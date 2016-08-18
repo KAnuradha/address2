@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Place Autocomplete</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="/show/" method="POST">{% csrf_token %}
+    <input id="pac-input" class="controls" name="address" type="text"
+        placeholder="Enter a location">
+
+    <!-- <div id="map"></div> -->
+
+    <script>
+      // This example requires the Places library. Include the libraries=places
+      // parameter when you first load the API. For example:
+      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+      function initMap() {
+        var input = /** @type {!HTMLInputElement} */(
+            document.getElementById('pac-input'));
+
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        autocomplete.addListener('place_changed', function(event) {
+          var place = autocomplete.getPlace();
+          console.log(place["url"])
+          // window.open(place["url"], "_blank")
+          console.log(place);
+
+          var address = '';
+          if (place.address_components) {
+              address = [
+                  (place.address_components[0] && place.address_components[0].short_name || ''),
+                  (place.address_components[1] && place.address_components[1].short_name || ''),
+                  (place.address_components[2] && place.address_components[2].short_name || '')
+                  ].join(' ');
+            }
+
+          var lat = address.coords.latitude;
+          var lon = address.coords.longitude;
+        
+          document.getElementById('latitude').innerHTML = lat;
+          document.getElementById('longitude').innerHTML = lon;
+            
+          var latLong = new google.maps.LatLng(lat, lon);
+
+            geocoder = new google.maps.Geocoder();
+            geocoder.geocode({'address':address}, function(results, status) {
+              if (status == google.maps.GeocoderStatus.OK) {
+                alert(+results[0].geometry.location.lat());
+                alert("Longitude: "+results[0].geometry.location.lng());
+                document.getElementById("demo").innerHTML =
+                '("Latitude: "+results[0].geometry.location.lat())';
+              } 
+              else {
+                alert("Geocode was not successful for the following reason: " + status);
+              }
+          });
+
+          // Important comments:
+          // 1. design a form in html with hidden input tags.
+          // 2. add lat and Lag and address to form.
+          // 3. Perform the form submission, which need to redirect to show view function with form data.
+          // 4. At show view function, get all these lat, lag and address values and pass these data to test.html
+      });
+      }
+    </script>
+
+      <input type="submit" value="show">
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsESCWDJJgjXPCOB66N6VfkwHVYG8le9o&libraries=places&callback=initMap"
+        async defer></script>
+        </form>
+  </body>
+</html>
